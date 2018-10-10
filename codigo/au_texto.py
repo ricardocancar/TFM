@@ -4,6 +4,7 @@ import os
 import itertools
 import glob
 import re
+import datetime
 def get_args():
    desc = "is a speech to text script"
    epilog = "-a directory of python files audio input -o name_file.txt both args are require"
@@ -11,7 +12,7 @@ def get_args():
    parser = argparse.ArgumentParser(description=desc,epilog=epilog,
                                     formatter_class=argparse.RawDescriptionHelpFormatter)
    parser.add_argument('-a', '--audio',
-                       help='audio file input to transform in text',
+                       help='path to dir audio files to transform in text',
                        required=True)
 
    parser.add_argument('-o', '--out',
@@ -29,6 +30,8 @@ def audios(input_dirs):
         sys.exit(1)
     for d in dirs:
         wavs = glob.glob(d + '/*.wav')
+        if len(wavs) > 1:
+            wavs = sorted(wavs)
         if len(wavs) == 0:
             print("No wav file found in {0}".format(d))
             sys.exit(1)
@@ -45,10 +48,13 @@ def read_wav(audio):
 
 def audio_text(salida, r, audio):
    salida = salida.split('/')[-1]
-   salida = re.match(r"([a-z]+)([0-9:]+)", salida, re.I).groups()
-   print(salida)
+   salida = re.match(r"(\w+)(-)([0-9.]+)(-)([0-9]+)", salida, re.I).groups()
+   start = float(salida[2])/16000
+   end = float(salida[4])/16000
+   start = str(datetime.timedelta(seconds=start))
+   end = str(datetime.timedelta(seconds=end))
    with open("./text/{}.txt".format(salida[0]),"a") as f:
-       f.write(salida[1] + '\n\n')
+       f.write(start + '-'+ end + '\n\n')
        f.write(r.recognize_google(audio,language="es").encode('utf-8') + '\n\n') # ca-ES catalan
   
 

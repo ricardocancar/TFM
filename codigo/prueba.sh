@@ -14,6 +14,8 @@ docker exec -it 93a255fe35f7 root/speaker-recognition/src/speaker-recognition.py
 python3 order_prediction.py -i $1
 
 chmod 666 "sorted_prediction.csv"
+
+python au_texto.py -a /home/ricardo/Documents/TFM/codigo/audio_to_txt
 # rm -r predict/*.wav
 #python au_texto.py -a /home/ricardo/Documents/TFM/codigo/audio_to_txt/
 
