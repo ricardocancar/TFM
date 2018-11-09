@@ -6,6 +6,8 @@ import glob
 import re
 import datetime
 import sys
+import pandas as pd
+import numpy
 
 
 def get_args():
@@ -55,21 +57,38 @@ def read_wav(audio):
     return r, audio
 
 
-def audio_text(salida, r, audio):
+def audio_text(salida, r, audio, df):
     salida = salida.split('/')[-1]
     salida = re.match(r"(\w+)(-)([0-9.]+)(-)([0-9]+)", salida, re.I).groups()
-    start = float(salida[2])/16000
-    end = float(salida[4])/16000
-    start = str(datetime.timedelta(seconds=start))
-    end = str(datetime.timedelta(seconds=end))
-    with open("./text/{}.txt".format(salida[0]), "w+") as f:
-        f.write(start + '-' + end + '\n\n')
-        try:
-            f.write(str(r.recognize_google(audio, language="es"))
-                    + '\n\n')  # ca-ES catalan
-        except sr.UnknownValueError as e:
+    start = float(salida[2])  # /16000
+    end = float(salida[4])  # /16000
+    index_list = df.index.values
+    true_table = (df['start'] + 1 > start) & (df['start'] - 1 < end)
+    for i in range(len(index_list)):
+        if numpy.bool(true_table[index_list[i]]) is True:
+            last_index = index_list[i]
+    try:
+        dictio = {'label': df.loc[last_index]['label'],
+                  'start-end': f'{start}-{end}',
+                  'text': str(r.recognize_google(audio, language="es"))}
+        row = pd.Series(dictio)
+#        df['text'][(df['start'] + 1 > start) & (df['start'] - 1 < end)] \
+#            = str(r.recognize_google(audio, language="es"))
+    except sr.UnknownValueError as e:
             print(("couldn't do speech to text due lack of "
                    f"data in audio: {salida[0]} time: {start}-{end}"))
+            dictio = {'label': df.loc[last_index]['label'],
+                      'start-end': f'{start}-{end}',
+                      'text': ''}
+            row = pd.Series(dictio)
+#    start1 = str(datetime.timedelta(seconds=start/16000))
+#    end1 = str(datetime.timedelta(seconds=end/16000))
+#   df['start-date-time'][(df['start'] + 1 > start) & (df['start'] - 1 < end)]\
+#        = start1
+#    df['end-date-time'][(df['start'] + 1 > start) & (df['start'] - 1 < end)]\
+#        = end1
+    return row
+#    df.to_csv('exit.csv')
 
 
 if __name__ == '__main__':
