@@ -67,20 +67,22 @@ def audio_text(salida, r, audio, df):
     for i in range(len(index_list)):
         if numpy.bool(true_table[index_list[i]]) is True:
             last_index = index_list[i]
+    start = int(start/16000)
+    end = int(end/16000)
     try:
-        dictio = {'label': df.loc[last_index]['label'],
-                  'start-end': f'{start}-{end}',
-                  'text': str(r.recognize_google(audio, language="es"))}
-        row = pd.Series(dictio)
+        csv_row = {'label': df.loc[last_index]['label'],
+                   'start-end': f'{start}-{end}',
+                   'text': str(r.recognize_google(audio, language="es"))}
+        row = pd.Series(csv_row)
 #        df['text'][(df['start'] + 1 > start) & (df['start'] - 1 < end)] \
 #            = str(r.recognize_google(audio, language="es"))
     except sr.UnknownValueError as e:
             print(("couldn't do speech to text due lack of "
                    f"data in audio: {salida[0]} time: {start}-{end}"))
-            dictio = {'label': df.loc[last_index]['label'],
-                      'start-end': f'{start}-{end}',
-                      'text': ''}
-            row = pd.Series(dictio)
+            csv_row = {'label': df.loc[last_index]['label'],
+                       'start-end': f'{start}-{end}',
+                       'text': ''}
+            row = pd.Series(csv_row)
 #    start1 = str(datetime.timedelta(seconds=start/16000))
 #    end1 = str(datetime.timedelta(seconds=end/16000))
 #   df['start-date-time'][(df['start'] + 1 > start) & (df['start'] - 1 < end)]\

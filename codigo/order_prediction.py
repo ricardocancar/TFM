@@ -104,4 +104,5 @@ if __name__ == '__main__':
         r, audio = au_texto.read_wav(wav)
         dataset_to_classify = dataset_to_classify.append(
                 au_texto.audio_text(wav, r, audio, df), ignore_index=True)
-    dataset_to_classify.to_csv('interversion_to_classify.csv', index=False)
+    dataset_to_classify.to_csv(('data_interversions_set/'
+                               'interversion_to_classify.csv'), index=False)
