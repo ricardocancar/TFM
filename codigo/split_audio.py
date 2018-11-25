@@ -93,10 +93,10 @@ if __name__ == '__main__':
     if args.aggressive:
         vad.set_mode(int(args.aggressive))
     else:
-        vad.set_mode(3)
+        vad.set_mode(2)
     # convert samples to raw 16 bit per sample stream needed by webrtcvad
     raw_samples = struct.pack("%dh" % len(samples), *samples)
-    window_duration = 0.02	 # duration in seconds
+    window_duration = 0.01	 # duration in seconds
     samples_per_window = int(window_duration * sample_rate + 0.5)
     bytes_per_sample = 2
     segments = get_segments(samples, raw_samples, sample_rate,
