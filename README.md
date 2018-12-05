@@ -1,5 +1,9 @@
 # TFM
 
+modulos de TFM.
+![alt text](/diagrama/TFM.png)
+
+
 ### enviroment 
 
 - python 2.7.15

@@ -40,13 +40,17 @@ def get_segments(samples, raw_samples, sample_rate, samples_per_window,
                  bytes_per_sample):
     segments = []
     for start in np.arange(0, len(samples), samples_per_window):
-        stop = min(start + samples_per_window, len(samples))
-        is_speech = vad.is_speech(
-                raw_samples[start * bytes_per_sample: stop * bytes_per_sample],
-                sample_rate=sample_rate)
+        try:
+            stop = min(start + samples_per_window, len(samples))
+            is_speech = vad.is_speech(
+                    raw_samples[start * bytes_per_sample: stop *
+                                bytes_per_sample],
+                    sample_rate=sample_rate)
 
-        segments.append(dict(
-                             start=start, stop=stop, is_speech=is_speech))
+            segments.append(dict(
+                                 start=start, stop=stop, is_speech=is_speech))
+        except Exception as e:
+            print(f'error in {e}:  start {start} : stop {stop}')
     return segments
 
 
@@ -93,10 +97,10 @@ if __name__ == '__main__':
     if args.aggressive:
         vad.set_mode(int(args.aggressive))
     else:
-        vad.set_mode(2)
+        vad.set_mode(3)
     # convert samples to raw 16 bit per sample stream needed by webrtcvad
     raw_samples = struct.pack("%dh" % len(samples), *samples)
-    window_duration = 0.01	 # duration in seconds
+    window_duration = 0.02  # duration in seconds
     samples_per_window = int(window_duration * sample_rate + 0.5)
     bytes_per_sample = 2
     segments = get_segments(samples, raw_samples, sample_rate,
