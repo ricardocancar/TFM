@@ -92,7 +92,8 @@ def audio_spliter(segments, output_path):
 
 if __name__ == '__main__':
     args = get_args()
-    sample_rate, samples = wavfile.read(args.input)
+    sample_rate, samples = wavfile.read(os.path.dirname(
+                                        os.path.abspath(__file__)) + args.input)
     vad = webrtcvad.Vad()
     if args.aggressive:
         vad.set_mode(int(args.aggressive))
@@ -106,6 +107,7 @@ if __name__ == '__main__':
     segments = get_segments(samples, raw_samples, sample_rate,
                             samples_per_window, bytes_per_sample)
     audio_spliter(segments, args.output)
+
 
 # speech_samples = np.concatenate(
 # [samples[segment['start']:segment['stop']]

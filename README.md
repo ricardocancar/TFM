@@ -6,7 +6,7 @@ modulos de TFM.
 
 ### enviroment 
 
-- python 2.7.15
+- python 3.6.5
   - [webrtcvad](https://github.com/wiseman/py-webrtcvad)==2.0.10
   - pandas==0.23.4
   - numpy==1.15.1
@@ -77,3 +77,24 @@ pd. las muestras de entrenamiento y clasificación deben pasar por el mismo filt
 el script **split_audio.py** separa las muestras de audio cuando detecta silencio. además remueve las muestras que no detecta actividad de voz ya que las parte de silencio afectan negativamente la predicción del modelo. 
 
 por lo que es importante que las muestras de audio que se van a entrenar pasen por este filtro antes de ser entrenadas y clasificadas por el speaker recognition.
+
+los audios se descargan de [rtve](http://www.rtve.es/alacarta/videos/telediario/) en la pagina [descagatusvideos](http://www.descargavideos.tv/) los videos son descargados a formato mp4.
+
+### Modulo 1:
+Transforma el video a audio con las siguientes caracteristicas mono canal,
+frecuencia de 16000 hz y formato .wav.
+
+### Modulo 2:
+Segmenta el audio, creando los puntos de cortes en las parte que el algoritmo detecta como silenciosas.
+
+### Modulo 3:
+Modelo de GMM de speaker recognition, que classifica el audio y genera como salida, un csv que indica tiempo de intervension dentro del telediario de los principales actores políticos de España y sus nombres.
+
+### Modulo 4:
+Toma la salida del modulo tres para cortar los segmentos de audio del audio original del telediario donde se identificó la participación de los principales actores políticos, según el speaker recognition. Luego los transforma a texto con la ayuda de la [API](https://pypi.org/project/SpeechRecognition/) de google.
+
+### Modulo 5:
+clasificacion de texto por completar.
+
+### Modulo 6:
+app del TFM por completar.
