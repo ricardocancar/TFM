@@ -1,6 +1,7 @@
 #!/bin/python
 
 import os
+import glob
 import argparse
 import numpy as np
 import struct
@@ -10,30 +11,8 @@ from scipy.io import wavfile
 train_audio_path = "/home/ricardo/Documents/TFM/codigo/audio/ass.wav"
 # filename = 'yes/0a7c2a8d_nohash_0.wav'
 
-
-def get_args():
-    desc = "Split audio.wav when nobody is speaking"
-    epilog = """
-             this file is make automatic audio samples split.
-
-             Examples:
-             python VAD_plit.py -f Path/to/audio.wav
-             """
-    parser = argparse.ArgumentParser(description=desc, epilog=epilog,
-                                     formatter_class=argparse.
-                                     RawDescriptionHelpFormatter)
-    parser.add_argument('-i', '--input',
-                        help='name of audio you want to split',
-                        required=True)
-
-    parser.add_argument('-o', '--output',
-                        help='path to output example /path/to/output/',
-                        required=True)
-    parser.add_argument('-a', '--aggressive',
-                        help='level of aggresivisness of the split',
-                        required=False)
-    ret = parser.parse_args()
-    return ret
+DIR_INPUT = '/audio_start'
+DIR_OUTPUT = '/predict/'
 
 
 def get_segments(samples, raw_samples, sample_rate, samples_per_window,
@@ -91,22 +70,26 @@ def audio_spliter(segments, output_path):
 
 
 if __name__ == '__main__':
-    args = get_args()
-    sample_rate, samples = wavfile.read(os.path.dirname(
-                                        os.path.abspath(__file__)) + args.input)
-    vad = webrtcvad.Vad()
-    if args.aggressive:
-        vad.set_mode(int(args.aggressive))
-    else:
+    absolute_path = os.path.dirname(
+            os.path.abspath(__file__)) + DIR_INPUT + '/*.wav'
+    absolute_path_out = os.path.dirname(
+            os.path.abspath(__file__)) + DIR_OUTPUT
+    files = glob.glob(absolute_path)
+    for file in files:
+        sample_rate, samples = wavfile.read(file)
+        vad = webrtcvad.Vad()
+#        if args.aggressive:
+#            vad.set_mode(int(args.aggressive))
+#        else:
         vad.set_mode(3)
-    # convert samples to raw 16 bit per sample stream needed by webrtcvad
-    raw_samples = struct.pack("%dh" % len(samples), *samples)
-    window_duration = 0.02  # duration in seconds
-    samples_per_window = int(window_duration * sample_rate + 0.5)
-    bytes_per_sample = 2
-    segments = get_segments(samples, raw_samples, sample_rate,
-                            samples_per_window, bytes_per_sample)
-    audio_spliter(segments, args.output)
+        # convert samples to raw 16 bit per sample stream needed by webrtcvad
+        raw_samples = struct.pack("%dh" % len(samples), *samples)
+        window_duration = 0.02  # duration in seconds
+        samples_per_window = int(window_duration * sample_rate + 0.5)
+        bytes_per_sample = 2
+        segments = get_segments(samples, raw_samples, sample_rate,
+                                samples_per_window, bytes_per_sample)
+        audio_spliter(segments, absolute_path_out)
 
 
 # speech_samples = np.concatenate(

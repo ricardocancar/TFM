@@ -1,41 +1,15 @@
 import re
 import os
+import glob
 import pandas as pd
-import argparse
 from scipy.io import wavfile
 import au_texto
 
+DIR_INPUT = '/audio_start'
 
-def get_args():
-    desc = ("order the classifications maked by the speaker reconigtions "
-            "on time line")
-    epilog = """
-             extrac the audio parts to be analice in future.
-
-             Examples:
-             python VAD_plit.py -i Path/to/audio.wav -o outputfile
-             """
-    parser = argparse.ArgumentParser(description=desc, epilog=epilog,
-                                     formatter_class=argparse
-                                     .RawDescriptionHelpFormatter)
-
-    parser.add_argument('-i', '--input',
-                        help='name of audio you want to split',
-                        required=True)
-    
-    parser.add_argument('-c', '--current',
-                        help='pass the work directory directory',
-                        required=True)    
-
-    parser.add_argument('-o', '--out',
-                        help='name of file output',
-                        required=False)
-    ret = parser.parse_args()
-    return ret
-
-
+FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 def sort_classifications():
-    df = pd.read_csv("predictions.csv")
+    df = pd.read_csv(f"{FILE_PATH}/predictions.csv")
     # df['new'] = pd.Series(np.random.randn(len(df['file'])), index=df.index)
     for i in range(len(df)):
         # print(df['file'][i].split('/')[-1])
@@ -102,21 +76,21 @@ def write_audio_classification(df):
             count += 1
 
 
-
 if __name__ == '__main__':
-    args = get_args()
-    sample_rate, samples = wavfile.read(os.path.dirname(
-                                        os.path.abspath(__file__)) + args.input)
-    df = sort_classifications()
-    write_audio_classification(df)
-    wavs = au_texto.audios(f'{args.current}/audio_to_txt/')
-    dataset_to_classify = pd.DataFrame()
-    for wav in wavs:
-        r, audio = au_texto.read_wav(wav)
-        dataset_to_classify = dataset_to_classify.append(
-                au_texto.audio_text(wav, r, audio, df), ignore_index=True)
-    audio_name = args.input.split('/')[1]
-    dataset_to_classify.to_csv((f'{args.current}/'
-                               f'{audio_name}_interversion_to_classify.csv'),
-                               index=False)
-
+    absolute_path_input = os.path.dirname(
+        os.path.abspath(__file__)) + DIR_INPUT + '/*.wav'
+    files = glob.glob(absolute_path_input)
+    for file in files:
+        sample_rate, samples = wavfile.read(file)
+        df = sort_classifications()
+        write_audio_classification(df)
+        wavs = au_texto.audios(f'{FILE_PATH}/audio_to_txt/')
+        dataset_to_classify = pd.DataFrame()
+        for wav in wavs:
+            r, audio = au_texto.read_wav(wav)
+            dataset_to_classify = dataset_to_classify.append(
+                    au_texto.audio_text(wav, r, audio, df), ignore_index=True)
+        audio_name = file.split('/')[-1]
+        dataset_to_classify.to_csv((f'{FILE_PATH}/data_interversions_set/'
+                                   f'{audio_name}_interversion_to_classify.csv'
+                                    ), index=False)
