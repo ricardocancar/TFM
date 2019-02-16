@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ object.video_name }}</h1>
+<p>Path to file = {{ object.path }}</p>
+<p>{{ object.label }}</p>
+
+{{object.score}}
+{% endblock %}

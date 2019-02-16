@@ -70,8 +70,9 @@ def audio_text(salida, r, audio, df):
     start = int(start/16000)
     end = int(end/16000)
     try:
-        csv_row = {'label': df.loc[last_index]['label'],
-                   'start-end': f'{start}-{end}',
+        csv_row = {'video_name': df['video_name'][last_index],
+                   'label': df.loc[last_index]['label'],
+                   'start_end': f'{start}-{end}',
                    'text': str(r.recognize_google(audio, language="es"))}
         row = pd.Series(csv_row)
 #        df['text'][(df['start'] + 1 > start) & (df['start'] - 1 < end)] \
@@ -80,7 +81,7 @@ def audio_text(salida, r, audio, df):
             print(("couldn't do speech to text due lack of "
                    f"data in audio: {salida[0]} time: {start}-{end}"))
             csv_row = {'label': df.loc[last_index]['label'],
-                       'start-end': f'{start}-{end}',
+                       'start_end': f'{start}-{end}',
                        'text': ''}
             row = pd.Series(csv_row)
 #    start1 = str(datetime.timedelta(seconds=start/16000))

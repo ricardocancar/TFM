@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>about page</h1>
+<p>boring as hell</p>
+
+<p>
+{{ text }}, {{ number }},
+{{ list }}
+</p>
+
+<ul>
+<li> Item 1 </li>
+<li> Item 2 </li>
+</ul>
+
+<ul>
+{% for item in list %}
+   <li>{{ item }}</li>
+{% endfor %}
+</ul>
+{% endblock %}
