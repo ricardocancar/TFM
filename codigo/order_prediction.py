@@ -14,8 +14,7 @@ FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 def sort_classifications():
     name = au_texto.audios(f'.{DIR_INPUT}')
     # it work for only one file at time for now
-    # name = name[0].split('/')[-1]
-    name = 'audio24_07'
+    name = name[0].split('/')[-1]
     df = pd.read_sql_query("select * from clasifications_clasifications where "
                            f"video_name=:c;",
                            conn, params={'c': f'{name}'})
@@ -93,11 +92,12 @@ if __name__ == '__main__':
     absolute_path_input = os.path.dirname(
         os.path.abspath(__file__)) + DIR_INPUT + '/*.wav'
     files = glob.glob(absolute_path_input)
+
     for file in files:
         sample_rate, samples = wavfile.read(file)
-        wavs = au_texto.audios(f'{FILE_PATH}/audio_to_txt/')
         df = sort_classifications()
         write_audio_classification(df)
+        wavs = au_texto.audios(f'{FILE_PATH}/audio_to_txt/')
         dataset_to_classify = pd.DataFrame()
         for wav in wavs:
             r, audio = au_texto.read_wav(wav)

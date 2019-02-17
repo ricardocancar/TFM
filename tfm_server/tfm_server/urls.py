@@ -18,8 +18,11 @@ from django.urls import path
 
 from clasifications.views import clasifications_detail_view, clasifications_create_view
 from pre_classifications_content.views import  PreClassificationsContent_create_view, PreClassificationsContent_detail_view
+from content_classificated.views import ClasificationsContent_detail_view
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('clasifications/', clasifications_detail_view),
     path('preclasificaitons/', PreClassificationsContent_detail_view),
+    path('content_view/', ClasificationsContent_detail_view),
 ]
