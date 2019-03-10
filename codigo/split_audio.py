@@ -4,15 +4,33 @@ import os
 import glob
 import argparse
 import numpy as np
+import logging
 import struct
 import webrtcvad
 
 from scipy.io import wavfile
-train_audio_path = "/home/ricardo/Documents/TFM/codigo/audio/ass.wav"
 # filename = 'yes/0a7c2a8d_nohash_0.wav'
 
 DIR_INPUT = '/audio_start'
 DIR_OUTPUT = '/predict/'
+
+logging.basicConfig(filename="./log/split_audio.log", format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+logger = logging.getLogger(__name__)
+
+def get_args():
+    desc = "just to get video to proccess"
+    epilog = """only needed to get the file to read the files"""
+    parser = argparse.ArgumentParser(
+            description=desc, epilog=epilog,
+            formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    parser.add_argument('-i', '--input',
+                        help='the wav audio you need to split',
+                        required=True)
+    ret = parser.parse_args()
+    return ret
 
 
 def get_segments(samples, raw_samples, sample_rate, samples_per_window,
@@ -29,7 +47,7 @@ def get_segments(samples, raw_samples, sample_rate, samples_per_window,
             segments.append(dict(
                                  start=start, stop=stop, is_speech=is_speech))
         except Exception as e:
-            print(f'error in {e}:  start {start} : stop {stop}')
+            raise Exception(f'error in {e}:  start {start} : stop {stop}')
     return segments
 
 
@@ -70,17 +88,20 @@ def audio_spliter(segments, output_path):
 
 
 if __name__ == '__main__':
-    absolute_path = os.path.dirname(
-            os.path.abspath(__file__)) + DIR_INPUT + '/*.wav'
-    absolute_path_out = os.path.dirname(
-            os.path.abspath(__file__)) + DIR_OUTPUT
-    files = glob.glob(absolute_path)
-    for file in files:
+#    absolute_path = os.path.dirname(
+#            os.path.abspath(__file__)) + DIR_INPUT
+    global args
+    try:
+        absolute_path_out = os.path.dirname(
+                os.path.abspath(__file__)) + DIR_OUTPUT
+        args = get_args()
+        file = args.input
+#       file = file.split('/')[-1]
         sample_rate, samples = wavfile.read(file)
         vad = webrtcvad.Vad()
-#        if args.aggressive:
-#            vad.set_mode(int(args.aggressive))
-#        else:
+#       if args.aggressive:
+#           vad.set_mode(int(args.aggressive))
+#       else:
         vad.set_mode(3)
         # convert samples to raw 16 bit per sample stream needed by webrtcvad
         raw_samples = struct.pack("%dh" % len(samples), *samples)
@@ -90,6 +111,8 @@ if __name__ == '__main__':
         segments = get_segments(samples, raw_samples, sample_rate,
                                 samples_per_window, bytes_per_sample)
         audio_spliter(segments, absolute_path_out)
+    except Exception as e:
+        logger.warning(f'{e}')
 
 
 # speech_samples = np.concatenate(

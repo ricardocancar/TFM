@@ -1,9 +1,80 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{{ object.video_name }}</h1>
-<p>Path to file = {{ object.path }}</p>
-<p>{{ object.label }}</p>
+
+
+
+<script>
+var out_list = [];
+var inner_list = [];
+var pos = 10;
+{% for item in another_metrics %}
+   inner_list.push({x: pos, y: {{item.numbers}}, indexLabel: "{{item.political}}", label: "{{item.content}}"})
+   pos +=10
+{% endfor %}
+var map = [];
+{% for item in object %}
+    map.push({y: Math.round({{item.numbers}}), label: "{{item.content}}"})
+{% endfor %}
+
+window.onload = function() {
+var x = Math.round({{ object.0.numbers }});
+var chart = new CanvasJS.Chart("chartContainer", {
+	theme: "light2", // "light1", "light2", "dark1", "dark2"
+	exportEnabled: true,
+	animationEnabled: true,
+	title: {
+		text: "temas tratados por politicos en los telediarios "
+	},
+	data: [{
+		type: "pie",
+		startAngle: 25,
+		toolTipContent: "<b>{label}</b>: {y}%",
+		showInLegend: "true",
+		legendText: "{label}",
+		indexLabelFontSize: 16,
+		indexLabel: "{label} - {y}%",
+		dataPoints: map
+	}]
+});
+var chart2 = new CanvasJS.Chart("chartContainer2", {
+	animationEnabled: true,
+	exportEnabled: true,
+	theme: "light1", // "light1", "light2", "dark1", "dark2"
+	title:{
+		text: "intervension classify"
+	},
+	data: [{
+		type: "column", //change type to bar, line, area, pie, etc
+		//indexLabel: "{y}", //Shows y value on all Data Points
+		showInLegend: "true",
+		legendText: "{label}",
+		indexLabelFontColor: "#5A5757",
+		indexLabelPlacement: "outside",
+		dataPoints: inner_list
+	}]
+});
+
+chart.render();
+chart2.render();
+
+}
+
+</script>
+
+<button id="Button" class="float-left submit-button" >Home</button>
+<script type="text/javascript">
+    document.getElementById("Button").onclick = function () {
+        location.href = "/";
+    };
+</script>
+</head>
+<body>
+<div id="chartContainer" style="height: 200px; width: 60%;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<div id="chartContainer2" style="height: 200px; width: 60%;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</body>
 
 {{object.score}}
 {% endblock %}

@@ -37,11 +37,11 @@ def clasifications_create_view(request):
 #    return render(request, 'product_create.html', context)
 
 def clasifications_detail_view(request):
-    obj = Clasifications.objects.get(id=1)
+    obj = Clasifications.objects.all()
 #    context = {
 #            'tittle': obj.title,
 #            'description': obj.description}
     context = {
             'object': obj
             }
-    return render(request, 'detail.html', context)
+    return render(request, 'home.html', context)

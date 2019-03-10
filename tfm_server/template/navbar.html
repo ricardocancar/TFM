@@ -5,3 +5,21 @@
        <li>About</li>
     </ul>
 </nav>
+<table>
+      <tr>
+        <th>video_name</th>
+        <th>start_end</th>
+        <th>label</th>
+        <th>text</th>
+        <th>tag</th>
+      </tr>
+      {% for item in object %}
+        <tr>
+        <td>{{item.video_name}}</td>
+        <td>{{item.start_end}}</td>
+        <td>{{item.label}}</td>
+        <td>{{item.text}}</td>
+        <td>{{item.tag}}</td>
+        </tr>
+      {% endfor %}
+</table>

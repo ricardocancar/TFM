@@ -3,18 +3,36 @@ import os
 import glob
 import pandas as pd
 import sqlite3
+import 
 from scipy.io import wavfile
+import argparse
 import au_texto
 
-DIR_INPUT = '/audio_start'
+DIR_INPUT = '/audio_start/'
 
 FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 
+logging.basicConfig(filename="./log/order_prediction.log", format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+logger = logging.getLogger(__name__)
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input',
+                        help='name of the video',
+                        required=True)
+
+    ret = parser.parse_args()
+    return ret
+
 
 def sort_classifications():
-    name = au_texto.audios(f'.{DIR_INPUT}')
+    # name = au_texto.audios(f'.{DIR_INPUT}')
     # it work for only one file at time for now
-    name = name[0].split('/')[-1]
+    args = get_args()
+    name = args.input
+    name = name.split('/')[-1]
     df = pd.read_sql_query("select * from clasifications_clasifications where "
                            f"video_name=:c;",
                            conn, params={'c': f'{name}'})
@@ -48,7 +66,6 @@ def write(df, i, index_list, count, start, end, label, eol=None):
         end = df.loc[index_list[count + 1], 'end']
         label = df.loc[index_list[count + 1], 'label']
         return start, end, label
-
 
 
 def write_audio_classification(df):
@@ -87,14 +104,16 @@ def write_audio_classification(df):
 
 if __name__ == '__main__':
     global conn
-    conn = sqlite3.connect(os.path.join('.', "..",
-                                        "tfm_server", "db.sqlite3"))
-    absolute_path_input = os.path.dirname(
-        os.path.abspath(__file__)) + DIR_INPUT + '/*.wav'
-    files = glob.glob(absolute_path_input)
+    try:
+        conn = sqlite3.connect(os.path.join('.', "..",
+                                            "tfm_server", "db.sqlite3"))
+        args = get_args()
+        name = args.input
+        name = name.split('/')[-1]
+        absolute_path_input = os.path.dirname(
+            os.path.abspath(__file__)) + DIR_INPUT + name
 
-    for file in files:
-        sample_rate, samples = wavfile.read(file)
+        sample_rate, samples = wavfile.read(absolute_path_input)
         df = sort_classifications()
         write_audio_classification(df)
         wavs = au_texto.audios(f'{FILE_PATH}/audio_to_txt/')
@@ -102,9 +121,10 @@ if __name__ == '__main__':
         for wav in wavs:
             r, audio = au_texto.read_wav(wav)
             dataset_to_classify = dataset_to_classify.append(
-                    au_texto.audio_text(wav, r, audio, df), ignore_index=True)
-        audio_name = file.split('/')[-1]
-        dataset_to_classify.to_sql(('pre_classifications_content_preclassificationscontent'
-                                    ), con=conn, if_exists='append',
-                                   index=False)
-    conn.close()
+                au_texto.audio_text(wav, r, audio, df), ignore_index=True)
+        dataset_to_classify.to_sql((
+                'pre_classifications_content_preclassificationscontent'),
+                con=conn, if_exists='append', index=False)
+        conn.close()
+    except Exception as e:
+         logger.warning(f'{e}')

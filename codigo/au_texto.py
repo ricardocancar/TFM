@@ -4,10 +4,17 @@ import os
 import itertools
 import glob
 import re
+import logging
 import datetime
 import sys
 import pandas as pd
 import numpy
+
+logging.basicConfig(filename="./log/au_text.log", format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+logger = logging.getLogger(__name__)
+
 
 
 def get_args():
@@ -36,14 +43,14 @@ def audios(input_dirs):
     # generator
     dirs = [d for d in dirs if os.path.isdir(d)]
     if len(dirs) == 0:
-        print("No valid directory found!")
+        logger.info("No valid directory found!")
         sys.exit(1)
     for d in dirs:
         wavs = glob.glob(d + '/*.wav')
         if len(wavs) > 1:
             wavs = sorted(wavs)
         if len(wavs) == 0:
-            print("No wav file found in {0}".format(d))
+            logger.info("No wav file found in {0}".format(d))
             sys.exit(1)
         else:
             return wavs
@@ -78,7 +85,7 @@ def audio_text(salida, r, audio, df):
 #        df['text'][(df['start'] + 1 > start) & (df['start'] - 1 < end)] \
 #            = str(r.recognize_google(audio, language="es"))
     except sr.UnknownValueError as e:
-            print(("couldn't do speech to text due lack of "
+            logger.warning(("couldn't do speech to text due lack of "
                    f"data in audio: {salida[0]} time: {start}-{end}"))
             csv_row = {'label': df.loc[last_index]['label'],
                        'start_end': f'{start}-{end}',
@@ -97,6 +104,9 @@ def audio_text(salida, r, audio, df):
 if __name__ == '__main__':
     args = get_args()
     wavs = audios(args.audio)
-    for wav in wavs:
-        r, audio = read_wav(wav)
-        audio_text(wav, r, audio)
+    try:
+        for wav in wavs:
+	    r, audio = read_wav(wav)
+	    audio_text(wav, r, audio)
+   except Exception as e:
+        logger.warning(f'{e}')
